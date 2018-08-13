@@ -33,7 +33,7 @@ int main( int argc, const char * argv[] )
     uint8_t *pBufferIn = jpgd::decompress_jpeg_image_from_file( pFilenameIn, &imageSizeX, &imageSizeY, &actualComps, reqComps );
     
     // Make enough memory for grayscale picture
-    const size_t outSize = imageSizeX * imageSizeY * 3; // Let's make regular grayscale picture
+    const size_t outSize = imageSizeX * imageSizeY * 3;
     std::unique_ptr< uint8_t > outBuffer( new uint8_t[outSize] );
     
     uint8_t *pBufferOut = outBuffer.get();
@@ -45,8 +45,8 @@ int main( int argc, const char * argv[] )
     // Save binary result
     jpge::params outParam;
     outParam.m_quality = 100;
-    outParam.m_subsampling = jpge::H2V2;//Y_ONLY;
-    const int outChannels = 3;
+    outParam.m_subsampling = jpge::Y_ONLY;
+    const int outChannels = 1;
     const bool res = jpge::compress_image_to_jpeg_file( pFilenameOut, imageSizeX, imageSizeY, outChannels, pBufferOut, outParam );
     //const bool res = jpge::compress_image_to_jpeg_file( pFilenameOut, imageSizeX, imageSizeY, outChannels, pBufferOut );
     assert( res );
