@@ -11,9 +11,12 @@
 #include <memory>
 #include <cassert>
 
-#include "ImageBinarizer.h"
 #include "jpeg/jpgd.h"
 #include "jpeg/jpge.h"
+#include "ImageBinarizer.h"
+#include "Filters/ThresholdFilter.h"
+#include "Filters/AverageFilter.h"
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,26 +35,33 @@ int main( int argc, const char * argv[] )
     const int reqComps = 4;
     uint8_t *pBufferIn = jpgd::decompress_jpeg_image_from_file( pFilenameIn, &imageSizeX, &imageSizeY, &actualComps, reqComps );
     
-    // Make enough memory for grayscale picture
-    const size_t outSize = imageSizeX * imageSizeY * 3;
-    std::unique_ptr< uint8_t > outBuffer( new uint8_t[outSize] );
-    
-    uint8_t *pBufferOut = outBuffer.get();
-    
+    // Filters
+    CThresholdFilter thresholdFilter( 0x70 );
+    CAverageFilter averageFilter;
+        
     // Process image
-    CImageBinarizer binalizer;
-    binalizer.Process( pBufferIn, pBufferOut, imageSizeX, imageSizeY, actualComps );
+    CImageBinarizer binalizer( &thresholdFilter );
+    //CImageBinarizer binalizer( &averageFilter );
+    binalizer.Process( pBufferIn, imageSizeX, imageSizeY, reqComps );
     
     // Save binary result
     jpge::params outParam;
     outParam.m_quality = 100;
     outParam.m_subsampling = jpge::Y_ONLY;
     const int outChannels = 1;
-    const bool res = jpge::compress_image_to_jpeg_file( pFilenameOut, imageSizeX, imageSizeY, outChannels, pBufferOut, outParam );
-    //const bool res = jpge::compress_image_to_jpeg_file( pFilenameOut, imageSizeX, imageSizeY, outChannels, pBufferOut );
-    assert( res );
+    const uint8_t *pOut = binalizer.GetBuffer();
+    if( pOut )
+    {
+        const bool res = jpge::compress_image_to_jpeg_file( pFilenameOut, imageSizeX, imageSizeY, outChannels, pOut, outParam );
+        assert( res );
+        std::cout << "Save\n";
+    }
+    else
+    {
+        std::cout << "There is no any filter\n";
+    }
     
-    std::cout << "Done\n";
+    
     
     return 0;
 }
