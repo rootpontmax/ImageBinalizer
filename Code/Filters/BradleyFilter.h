@@ -11,6 +11,9 @@ class CBradleyFilter : public IBinaryFilter
 {
 public:
     virtual void ProcessGreyscale( uint8_t *pBuffer, const int sizeX, const int sizeY ) const override;
+    
 private:
+    void    CalcIntegralSum( uint8_t *pBuffer, const int sizeX, const int sizeY ) const;
+    
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
