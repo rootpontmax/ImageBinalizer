@@ -73,10 +73,10 @@ void CImageBinarizer::MakeGreyscale( const uint8_t *pBuffer, const int bpp )
             const int offsetIn = ( y * m_bufferSizeX + x ) * bpp;
             const int offset = ( y * m_bufferSizeX + x );
             
-            const uint8_t colR = pBuffer[offsetIn];
-            const uint8_t colG = pBuffer[offsetIn + 1];
-            const uint8_t colB = pBuffer[offsetIn + 2];
-            const uint16_t grey = ( colR + colG + colB ) / 3;
+            const float colR = static_cast< float >( pBuffer[offsetIn] );
+            const float colG = static_cast< float >( pBuffer[offsetIn + 1] );
+            const float colB = static_cast< float >( pBuffer[offsetIn + 2] );
+            const float grey = colR * 0.2125f + colG * 0.7154f + colB * 0.0721f;
             pOut[offset] = static_cast< uint8_t >( grey );
         }
 }

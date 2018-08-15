@@ -16,6 +16,7 @@
 #include "ImageBinarizer.h"
 #include "Filters/ThresholdFilter.h"
 #include "Filters/AverageFilter.h"
+#include "Filters/BradleyFilter.h"
 
 
 
@@ -38,10 +39,12 @@ int main( int argc, const char * argv[] )
     // Filters
     CThresholdFilter thresholdFilter( 0x70 );
     CAverageFilter averageFilter;
+    CBradleyFilter bradleyFilter;
         
     // Process image
-    CImageBinarizer binalizer( &thresholdFilter );
+    //CImageBinarizer binalizer( &thresholdFilter );
     //CImageBinarizer binalizer( &averageFilter );
+    CImageBinarizer binalizer( &bradleyFilter );
     binalizer.Process( pBufferIn, imageSizeX, imageSizeY, reqComps );
     
     // Save binary result

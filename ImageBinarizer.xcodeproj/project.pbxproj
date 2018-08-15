@@ -11,6 +11,9 @@
 		FC067C912122139F009DE681 /* ImageBinarizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067C8F2122139F009DE681 /* ImageBinarizer.cpp */; };
 		FC067C9721221460009DE681 /* jpge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067C9521221460009DE681 /* jpge.cpp */; };
 		FC067C9821221460009DE681 /* jpgd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067C9621221460009DE681 /* jpgd.cpp */; };
+		FC067C9F2124C1BD009DE681 /* ThresholdFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067C9C2124C1BD009DE681 /* ThresholdFilter.cpp */; };
+		FC067CA02124C1BD009DE681 /* AverageFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067C9D2124C1BD009DE681 /* AverageFilter.cpp */; };
+		FC067CA32124CC1C009DE681 /* BradleyFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC067CA12124CC1C009DE681 /* BradleyFilter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +37,13 @@
 		FC067C9421221460009DE681 /* jpge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jpge.h; sourceTree = "<group>"; };
 		FC067C9521221460009DE681 /* jpge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpge.cpp; sourceTree = "<group>"; };
 		FC067C9621221460009DE681 /* jpgd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpgd.cpp; sourceTree = "<group>"; };
+		FC067C992124C1BD009DE681 /* IBinaryFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IBinaryFilter.h; sourceTree = "<group>"; };
+		FC067C9B2124C1BD009DE681 /* AverageFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AverageFilter.h; sourceTree = "<group>"; };
+		FC067C9C2124C1BD009DE681 /* ThresholdFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThresholdFilter.cpp; sourceTree = "<group>"; };
+		FC067C9D2124C1BD009DE681 /* AverageFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AverageFilter.cpp; sourceTree = "<group>"; };
+		FC067C9E2124C1BD009DE681 /* ThresholdFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThresholdFilter.h; sourceTree = "<group>"; };
+		FC067CA12124CC1C009DE681 /* BradleyFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BradleyFilter.cpp; sourceTree = "<group>"; };
+		FC067CA22124CC1C009DE681 /* BradleyFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BradleyFilter.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +76,8 @@
 		FC067C892122135A009DE681 /* Code */ = {
 			isa = PBXGroup;
 			children = (
+				FC067C9A2124C1BD009DE681 /* Filters */,
+				FC067C992124C1BD009DE681 /* IBinaryFilter.h */,
 				FC067C9221221460009DE681 /* jpeg */,
 				FC067C8F2122139F009DE681 /* ImageBinarizer.cpp */,
 				FC067C902122139F009DE681 /* ImageBinarizer.h */,
@@ -83,6 +95,19 @@
 				FC067C9621221460009DE681 /* jpgd.cpp */,
 			);
 			path = jpeg;
+			sourceTree = "<group>";
+		};
+		FC067C9A2124C1BD009DE681 /* Filters */ = {
+			isa = PBXGroup;
+			children = (
+				FC067CA12124CC1C009DE681 /* BradleyFilter.cpp */,
+				FC067CA22124CC1C009DE681 /* BradleyFilter.h */,
+				FC067C9B2124C1BD009DE681 /* AverageFilter.h */,
+				FC067C9C2124C1BD009DE681 /* ThresholdFilter.cpp */,
+				FC067C9D2124C1BD009DE681 /* AverageFilter.cpp */,
+				FC067C9E2124C1BD009DE681 /* ThresholdFilter.h */,
+			);
+			path = Filters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -142,10 +167,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC067CA32124CC1C009DE681 /* BradleyFilter.cpp in Sources */,
+				FC067C9F2124C1BD009DE681 /* ThresholdFilter.cpp in Sources */,
 				FC067C912122139F009DE681 /* ImageBinarizer.cpp in Sources */,
 				FC067C8B2122135A009DE681 /* main.cpp in Sources */,
 				FC067C9821221460009DE681 /* jpgd.cpp in Sources */,
 				FC067C9721221460009DE681 /* jpge.cpp in Sources */,
+				FC067CA02124C1BD009DE681 /* AverageFilter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

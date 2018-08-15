@@ -65,7 +65,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/Scrooge/Code/__GitHub/ImageBinalizer/lena5.jpg"
+            argument = "/Users/Scrooge/Code/__GitHub/ImageBinalizer/Chess.jpg"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
