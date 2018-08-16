@@ -4,10 +4,11 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct IBinaryFilter
 {
-    virtual void ProcessGreyscale( uint8_t *pBuffer, const int sizeX, const int sizeY ) const = 0;
+    virtual void Process( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const = 0;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////

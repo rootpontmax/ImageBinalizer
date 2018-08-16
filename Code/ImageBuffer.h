@@ -1,0 +1,57 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Template class for buffer that can change its size.                                            //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma once
+#include <memory>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template< class T >
+class CImageBuffer
+{
+public:
+    CImageBuffer();
+    void    CheckOrCreate( const size_t sizeX, const size_t sizeY );
+    void    Clear();
+    T      *GetBuffer() const;
+    size_t  GetSizeX() const { return m_sizeX; }
+    size_t  GetSizeY() const { return m_sizeY; }
+    
+private:
+    std::unique_ptr< T >    m_buffer;
+    size_t                  m_sizeX;
+    size_t                  m_sizeY;
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template< class T >
+CImageBuffer< T >::CImageBuffer() :
+    m_sizeX( 0 ),
+    m_sizeY( 0 )
+{}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template< class T >
+void CImageBuffer< T >::CheckOrCreate( const size_t sizeX, const size_t sizeY )
+{
+    if( m_buffer && sizeX == m_sizeX && sizeY == m_sizeY )
+        return;
+        
+    Clear();
+    
+    const size_t size = sizeX * sizeY;
+    std::unique_ptr< T > buffer( new T[size] );
+    m_buffer = std::move( buffer );
+    m_sizeX = sizeX;
+    m_sizeY = sizeY;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template< class T >
+void CImageBuffer< T >::Clear()
+{
+    m_buffer.reset( nullptr );
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template< class T >
+T *CImageBuffer< T >::GetBuffer() const
+{
+    return m_buffer.get();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@ class CThresholdFilter : public IBinaryFilter
 {
 public:
     CThresholdFilter( const uint8_t threshold );
-    virtual void ProcessGreyscale( uint8_t *pBuffer, const int sizeX, const int sizeY ) const override;
+    virtual void Process( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const override;
 private:
 
     const uint8_t   m_threshold;

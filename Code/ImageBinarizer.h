@@ -6,6 +6,8 @@
 #include <cstdint>
 #include  <memory>
 
+#include "ImageBuffer.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct IBinaryFilter;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,13 +26,9 @@ public:
     
 private:
 
-    void    CheckBuffer( const int sizeX, const int sizeY );
-    void    CreateBuffer( const int sizeX, const int sizeY );
     void    MakeGreyscale( const uint8_t *pBuffer, const int bpp );
     
-    std::unique_ptr< uint8_t >  m_buffer;
+    CImageBuffer< uint8_t >     m_buffer;
     const IBinaryFilter        *m_pFilter;
-    int                         m_bufferSizeX;
-    int                         m_bufferSizeY;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////

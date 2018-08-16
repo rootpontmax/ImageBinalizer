@@ -5,15 +5,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 CImageBinarizer::CImageBinarizer() :
-    m_pFilter( nullptr ),
-    m_bufferSizeX( 0 ),
-    m_bufferSizeY( 0 )
+    m_pFilter( nullptr )
 {}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 CImageBinarizer::CImageBinarizer( const IBinaryFilter *pFilter ) :
-m_pFilter( pFilter ),
-    m_bufferSizeX( 0 ),
-    m_bufferSizeY( 0 )
+    m_pFilter( pFilter )
 {}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CImageBinarizer::Init( const IBinaryFilter *pFilter )
@@ -28,50 +24,34 @@ void CImageBinarizer::Process( const uint8_t *pBuffer, const int sizeX, const in
         
     assert( pBuffer );
     
-    CheckBuffer( sizeX, sizeY );
+    m_buffer.CheckOrCreate( sizeX, sizeY );
     MakeGreyscale( pBuffer, bpp );
-    m_pFilter->ProcessGreyscale( m_buffer.get(), sizeX, sizeY );
     
+    m_pFilter->Process( m_buffer.GetBuffer(), sizeX, sizeY );
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CImageBinarizer::Clear()
 {
-    m_buffer.reset( nullptr );
+    m_buffer.Clear();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const uint8_t *CImageBinarizer::GetBuffer() const
 {
-    return m_buffer.get();
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void CImageBinarizer::CheckBuffer( const int sizeX, const int sizeY )
-{
-    if( m_buffer && sizeX == m_bufferSizeX && sizeY == m_bufferSizeY )
-        return;
-        
-    Clear();
-    CreateBuffer( sizeX, sizeY );
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void CImageBinarizer::CreateBuffer( const int sizeX, const int sizeY )
-{
-    const size_t size = sizeX * sizeY;
-    std::unique_ptr< uint8_t > buffer( new uint8_t[size] );
-    m_buffer = std::move( buffer );
-    m_bufferSizeX = sizeX;
-    m_bufferSizeY = sizeY;
+    return m_buffer.GetBuffer();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CImageBinarizer::MakeGreyscale( const uint8_t *pBuffer, const int bpp )
 {
-    uint8_t *pOut = m_buffer.get();
+    uint8_t *pOut = m_buffer.GetBuffer();
     
     // Make grayscale
-    for( int y = 0; y < m_bufferSizeY; ++y )
-        for( int x = 0; x < m_bufferSizeX; ++x )
+    const size_t sizeX = m_buffer.GetSizeX();
+    const size_t sizeY = m_buffer.GetSizeY();
+    for( size_t y = 0; y < sizeY; ++y )
+        for( size_t x = 0; x < sizeX; ++x )
         {
-            const int offsetIn = ( y * m_bufferSizeX + x ) * bpp;
-            const int offset = ( y * m_bufferSizeX + x );
+            const size_t offsetIn = ( y * sizeX + x ) * bpp;
+            const size_t offset = ( y * sizeX + x );
             
             const float colR = static_cast< float >( pBuffer[offsetIn] );
             const float colG = static_cast< float >( pBuffer[offsetIn + 1] );
