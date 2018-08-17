@@ -3,6 +3,11 @@
 #include <cassert>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+CBradleyFilter::CBradleyFilter( const size_t patchSize, const float coef ) :
+    m_patchSize( patchSize ),
+    m_coef( coef )
+{}
+////////////////////////////////////////////////////////////////////////////////////////////////////
 void CBradleyFilter::Process( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
 {
     assert( pBuffer );
@@ -60,40 +65,42 @@ void CBradleyFilter::CalcIntegralSum( uint8_t *pBuffer ) const
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CBradleyFilter::Binarize( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
 {
-    
-    
-    const size_t patchCountX = sizeX / PATCH_SIZE + 1;
-    const size_t patchCountY = sizeY / PATCH_SIZE + 1;
-    
-    for( size_t patchY = 0; patchY < patchCountY; ++patchY )
-        for( size_t patchX = 0; patchX < patchCountX; ++patchX )
-        {
-            const size_t xLT = patchX * PATCH_SIZE;
-            const size_t yLT = patchY * PATCH_SIZE;
-            const size_t xRB = xLT + PATCH_SIZE;
-            const size_t yRB = yLT + PATCH_SIZE;
-            const uint32_t avg = GetAvg( xLT, yLT, xRB, yRB );
-        }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t CBradleyFilter::GetAvg( const size_t xLT, const size_t yLT, const size_t xRB, const size_t yRB ) const
-{
     const float *pSum = m_integralSumBuffer.GetBuffer();
-    const size_t sumSizeX = m_integralSumBuffer.GetSizeX();
-    const size_t sumSizeY = m_integralSumBuffer.GetSizeY();
+    const size_t bufferStride = m_integralSumBuffer.GetSizeX();
     
-    const size_t sumLTx = xLT + 1;
-    const size_t sumLTy = yLT + 1;
-    const size_t sumRBx = xRB + 1;
-    const size_t sumRBy = yRB + 1;
+    const int imageSizeX = static_cast< int >( sizeX );
+    const int imageSizeY = static_cast< int >( sizeY );
     
-    const size_t offsetA = sumLTy * sumSizeY + sumLTx;
-    
-    uint32_t sum = 0;
-    
-    
-    
-    
-    return sum;
+    for( int y = 0; y < sizeY; ++y )
+        for( int x = 0; x < sizeX; ++x )
+        {
+            int xL = x - m_patchSize;
+            int xR = x + m_patchSize;
+            int yT = y - m_patchSize;
+            int yB = y + m_patchSize;
+            
+            if( xL < 0 )
+                xL = 0;
+            if( yT < 0 )
+                yT = 0;
+            if( xR >= imageSizeX )
+                xR = imageSizeX - 1;
+            if( yB >= imageSizeY )
+                yB = imageSizeY - 1;
+                
+            const size_t offset = y * sizeX + x;
+            const size_t offsetLT = ( yT + 1 ) * bufferStride + ( xL + 1 ); 
+            const size_t offsetRB = ( yB + 1 ) * bufferStride + ( xR + 1 );
+            const size_t offsetRT = ( yT + 1 ) * bufferStride + ( xR + 1 );
+            const size_t offsetLB = ( yB + 1 ) * bufferStride + ( xL + 1 );
+                
+            const int count = ( xR - xL + 1) * ( yB - yT + 1 );
+            const float sum = pSum[offsetLT] + pSum[offsetRB] - pSum[offsetRT] - pSum[offsetLB];
+            const float threshold = sum * m_coef / static_cast< float >( count );
+            assert( threshold <= 255.0f );
+            const uint8_t threshold8 = static_cast< uint8_t >( threshold );
+            
+            pBuffer[offset] = ( pBuffer[offset] > threshold8 ) ? 0xFF : 0;
+        }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
