@@ -3,76 +3,51 @@
 #include <cassert>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-CBradleyFilter::CBradleyFilter( const size_t patchSize, const float coef ) :
+CBradleyFilter::CBradleyFilter( const size_t patchSize, const uint8_t coef ) :
     m_patchSize( patchSize ),
-    m_coef( coef )
+    m_coef( 0.0f )
 {}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CBradleyFilter::Process( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
 {
     assert( pBuffer );
-    m_integralSumBuffer.CheckOrCreate( sizeX + 1, sizeY + 1 );
-    CalcIntegralSum( pBuffer );
+    m_integralSumBuffer.CheckOrCreate( sizeX, sizeY );
+    CalcIntegralSum( pBuffer, sizeX, sizeY );
     Binarize( pBuffer, sizeX, sizeY );
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void CBradleyFilter::CalcIntegralSum( uint8_t *pBuffer ) const
+void CBradleyFilter::CalcIntegralSum( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
 {
-    float *pSum = m_integralSumBuffer.GetBuffer();
-    const int sumSizeX = static_cast< int >( m_integralSumBuffer.GetSizeX() );
-    const int sumSizeY = static_cast< int >( m_integralSumBuffer.GetSizeY() );
-    
-#ifdef DEBUG
-    for( size_t y = 0; y < sumSizeY; ++y )
-        for( size_t x = 0; x < sumSizeX; ++x )
-        {
-            const size_t offset = y * sumSizeX + x;
-            pSum[offset] = -1.0f;
-        }
-#endif
-
-    // First row
-    for( size_t x = 0; x < sumSizeX; ++x )
-        pSum[x] = 0.0f;
-        
-    // First column except first pixel
-    for( size_t y = 1; y < sumSizeY; ++y )
+    uint32_t *pSum = m_integralSumBuffer.GetBuffer();
+    for( size_t x = 0; x < sizeX; ++x )
     {
-        const size_t offset = y * sumSizeX;
-        pSum[offset] = 0.0f;
-    }
-    
-    // All other pixels exept first row and first column
-    for( int y = 1; y < sumSizeY; ++y )
-        for( int x = 1; x < sumSizeX; ++x )
+        uint32_t sum = 0;
+        for( size_t y = 0; y < sizeY; ++y )
         {
-            const int offset = y * sumSizeX + x;
-            const int offsetX = offset - 1;
-            const int offsetY = offset - sumSizeX;
-            const int offsetXY = offsetY - 1;
+            const size_t offset = y * sizeX + x;
+            assert( offset < sizeX * sizeY );
             
-            assert( offset >= 0.0f && offset < sumSizeX * sumSizeY );
-            assert( offsetX >= 0.0f && offsetX < sumSizeX * sumSizeY );
-            assert( offsetY >= 0.0f && offsetY < sumSizeX * sumSizeY );
-            assert( offsetXY >= 0.0f && offsetXY < sumSizeX * sumSizeY );
-            
-            assert( pSum[offsetX] >= 0.0f );
-            assert( pSum[offsetY] >= 0.0f );
-            assert( pSum[offsetXY] >= 0.0f );
-            
-            pSum[offset] = pBuffer[offset] + pSum[offsetX] + pSum[offsetY] - pSum[offsetXY];
+            sum += pBuffer[offset];
+            if( 0 == x )
+                pSum[offset] = sum;
+            else
+            {
+                assert( offset > 0 );
+                pSum[offset] = pSum[offset - 1] + sum;
+            }
         }
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CBradleyFilter::Binarize( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
 {
-    const float *pSum = m_integralSumBuffer.GetBuffer();
-    const size_t bufferStride = m_integralSumBuffer.GetSizeX();
+    const uint32_t *pSum = m_integralSumBuffer.GetBuffer();
+    
+    const int patchSize = static_cast< int >( sizeX ) / 16; // 16 from white paper
     
     // Make int to avoid warnings
     const int imageSizeX = static_cast< int >( sizeX );
     const int imageSizeY = static_cast< int >( sizeY );
-    const int patchSize = static_cast< int >( m_patchSize );
     
     for( int y = 0; y < sizeY; ++y )
         for( int x = 0; x < sizeX; ++x )
@@ -91,41 +66,35 @@ void CBradleyFilter::Binarize( uint8_t *pBuffer, const size_t sizeX, const size_
             if( yB >= imageSizeY )
                 yB = imageSizeY - 1;
                 
-            xL -= 1;
-            yT -= 1;
+            const int count = ( xR - xL ) * ( yB - yT );
+            assert( count > 0 && count <= ( patchSize * 2 ) * ( patchSize * 2 ) );
                 
-            assert( xL >= -1 && xL < imageSizeX );
-            assert( xR >= 0 && xR < imageSizeX );
-            assert( yT >= -1 && yT < imageSizeY );
-            assert( yB >= 0 && yB < imageSizeY );
             assert( xL < xR );
             assert( yT < yB );
                 
             const size_t offset = y * sizeX + x;
-            const size_t offsetLT = ( yT + 1 ) * bufferStride + ( xL + 1 ); 
-            const size_t offsetRB = ( yB + 1 ) * bufferStride + ( xR + 1 );
-            const size_t offsetRT = ( yT + 1 ) * bufferStride + ( xR + 1 );
-            const size_t offsetLB = ( yB + 1 ) * bufferStride + ( xL + 1 );
+            const size_t offsetLT = yT * sizeX + xL; 
+            const size_t offsetRB = yB * sizeX + xR;
+            const size_t offsetRT = yT * sizeX + xR;
+            const size_t offsetLB = yB * sizeX + xL;
             
             assert( offset < sizeX * sizeY );
-            assert( offsetLT < bufferStride * m_integralSumBuffer.GetSizeY() );
-            assert( offsetRB < bufferStride * m_integralSumBuffer.GetSizeY() );
-            assert( offsetRT < bufferStride * m_integralSumBuffer.GetSizeY() );
-            assert( offsetLB < bufferStride * m_integralSumBuffer.GetSizeY() );
-                
-            const int count = ( xR - xL + 1 ) * ( yB - yT + 1 );
+            assert( offsetLT < sizeX * sizeY );
+            assert( offsetRB < sizeX * sizeY );
+            assert( offsetRT < sizeX * sizeY );
+            assert( offsetLB < sizeX * sizeY );
 
-            const float sumA = pSum[offsetLT];
-            const float sumB = pSum[offsetRT];
-            const float sumC = pSum[offsetLB];
-            const float sumD = pSum[offsetRB];
-            const float sum = sumA + sumD - sumB - sumC;
-            const float avgSum = sum / static_cast< float >( count );
-            //assert( avgSum <= 255.0f );
-            const float threshold = avgSum * m_coef;
-            const uint8_t threshold8 = static_cast< uint8_t >( threshold );
-            
-            pBuffer[offset] = ( pBuffer[offset] > threshold8 ) ? 0xFF : 0;
+            const uint32_t sumA = pSum[offsetLT];
+            const uint32_t sumB = pSum[offsetRT];
+            const uint32_t sumC = pSum[offsetLB];
+            const uint32_t sumD = pSum[offsetRB];
+            const uint32_t sum = sumA + sumD - sumB - sumC;
+            const int thisInten = pBuffer[offset] * count;
+            const int threshold = sum * ( 100 - m_coef ) / 100;
+            if( thisInten <= threshold )
+                pBuffer[offset] = 0;
+            else
+                pBuffer[offset] = 0xFF;
         }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////

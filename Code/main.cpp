@@ -39,7 +39,7 @@ int main( int argc, const char * argv[] )
     // Filters
     CThresholdFilter thresholdFilter( 0x70 );
     CAverageFilter averageFilter;
-    CBradleyFilter bradleyFilter( 1, 1.0f );//1.15f );
+    CBradleyFilter bradleyFilter( 4, 15 );//1.15f );
         
     // Process image
     //CImageBinarizer binalizer( &thresholdFilter );
