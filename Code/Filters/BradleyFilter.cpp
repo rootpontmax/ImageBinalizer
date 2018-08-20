@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 CBradleyFilter::CBradleyFilter( const size_t patchSize, const uint8_t coef ) :
     m_patchSize( patchSize ),
-    m_coef( 0.0f )
+    m_coef( 0 )
 {}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void CBradleyFilter::Process( uint8_t *pBuffer, const size_t sizeX, const size_t sizeY ) const
@@ -49,8 +49,8 @@ void CBradleyFilter::Binarize( uint8_t *pBuffer, const size_t sizeX, const size_
     const int imageSizeX = static_cast< int >( sizeX );
     const int imageSizeY = static_cast< int >( sizeY );
     
-    for( int y = 0; y < sizeY; ++y )
-        for( int x = 0; x < sizeX; ++x )
+    for( int y = 0; y < imageSizeY; ++y )
+        for( int x = 0; x < imageSizeX; ++x )
         {
             int xL = x - patchSize;
             int xR = x + patchSize;
