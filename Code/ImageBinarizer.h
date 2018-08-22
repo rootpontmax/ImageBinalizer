@@ -3,10 +3,18 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#define USE_OPEN_CV
+
 #include <cstdint>
-#include  <memory>
+#include <memory>
 
 #include "ImageBuffer.h"
+
+#ifdef USE_OPEN_CV
+#include <opencv2/core/mat.hpp>
+#endif
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct IBinaryFilter;
@@ -19,14 +27,20 @@ public:
     
     void    Init( const IBinaryFilter *pFilter );
     void    Process( const uint8_t *pBufferIn, const int sizeX, const int sizeY, const int bpp );
+#ifdef USE_OPEN_CV
+	cv::Mat Process( const cv::Mat& mat );
+#endif
     void    Clear();
     
     // Get binarize image data
-    const uint8_t  *GetBuffer() const;
+    uint8_t *GetBuffer() const;
     
 private:
 
     void    MakeGreyscale( const uint8_t *pBuffer, const int bpp );
+#ifdef USE_OPEN_CV
+    void    MakeGreyscale(const cv::Mat& mat );
+#endif
     
     CImageBuffer< uint8_t >     m_buffer;
     const IBinaryFilter        *m_pFilter;

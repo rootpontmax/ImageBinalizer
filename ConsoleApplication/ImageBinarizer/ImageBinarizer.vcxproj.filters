@@ -9,30 +9,13 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Jpeg">
-      <UniqueIdentifier>{c83321a4-8dcc-463b-a93b-7b0ab8e98094}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Code\jpeg\jpgd.h">
-      <Filter>Jpeg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Code\jpeg\jpge.h">
-      <Filter>Jpeg</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ImageBinarizer.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Code\jpeg\jpgd.cpp">
-      <Filter>Jpeg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Code\jpeg\jpge.cpp">
-      <Filter>Jpeg</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

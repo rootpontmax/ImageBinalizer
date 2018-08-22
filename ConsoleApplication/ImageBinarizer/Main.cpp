@@ -13,19 +13,26 @@
 #include "../Code/jpeg/jpgd.h"
 #include "../Code/jpeg/jpge.h"
 
+//#include "opencv2/core.hpp"
+#include "opencv2/core/utility.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static const char *g_pAverageFilterStr = "average";
 static const char *g_pThresholdFilterStr = "threshold";
 static const char *g_pBradleyFilterStr = "bradley";
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static void ShowUsageRules()
 {
 	std::cout << "Usage\n";
-	std::cout << "[inputFile] [outFile] -t:[filterType]\n";
-	std::cout << "\t-t:" << g_pAverageFilterStr << " - for average value\n";
-	std::cout << "\t-t:" << g_pThresholdFilterStr << " - for assigned threshold\n";
-	std::cout << "\t-t:" << g_pBradleyFilterStr << " - for Bradley's algorithm\n";
+	std::cout << "[inputFile] [outFile] [filterType]\n";
+	std::cout << "Filter types:" << std::endl;
+	std::cout << "\t" << g_pAverageFilterStr << " - for average value\n";
+	std::cout << "\t" << g_pThresholdFilterStr << " - for assigned threshold\n";
+	std::cout << "\t" << g_pBradleyFilterStr << " - for Bradley's algorithm\n";
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static bool CheckCommandLine(int argc, const char * argv[])
@@ -55,25 +62,24 @@ int main( int argc, const char * argv[] )
 	if (!CheckCommandLine(argc, argv))
 		return 1;
 
-	// Get filename
+	// Get filenames and filter type
 	const char *pFilenameIn = argv[1];
 	const char *pFilenameOut = argv[2];
 	const char *pType = argv[3];
 
-	// Load file
-	int imageSizeX = 0;
-	int imageSizeY = 0;
-	int actualComps = 0;
-	const int reqComps = 4;
-	uint8_t *pBufferIn = jpgd::decompress_jpeg_image_from_file(pFilenameIn, &imageSizeX, &imageSizeY, &actualComps, reqComps);
+    // Load input image
+    cv::Mat imageIn;
+    imageIn = cv::imread( pFilenameIn, CV_LOAD_IMAGE_COLOR );
+    const int imageSizeX = imageIn.rows;
+    const int imageSizeY = imageIn.cols;
+    if( 0 == imageSizeX || 0 == imageSizeY )
+    {
+        std::cout << "Can't load image" << std::endl;
+        return 2;
+    }
 
-	if (!pBufferIn)
-	{
-		std::cout << "Can't open input file: " << pFilenameIn << std::endl;
-		return 1;
-	}
-
-	IBinaryFilter *pFilter = nullptr;
+    // Choose filter
+    IBinaryFilter *pFilter = nullptr;
 	if (strcmp(pType, g_pAverageFilterStr) == 0)
 	{
 		CThresholdFilter filter(0x70);
@@ -89,39 +95,27 @@ int main( int argc, const char * argv[] )
 		CBradleyFilter filter(4, 15);
 		pFilter = &filter;
 	}
-	
 
 	if (nullptr == pFilter)
 	{
 		std::cout << "Unknown filter type" << std::endl;
-		return 1;
+		return 3;
 	}
 
-	CImageBinarizer binalizer(pFilter);
-	binalizer.Process(pBufferIn, imageSizeX, imageSizeY, reqComps);
-
-	// Save binary result
-	jpge::params outParam;
-	outParam.m_quality = 100;
-	outParam.m_subsampling = jpge::Y_ONLY;
-	const int outChannels = 1;
-	const uint8_t *pOut = binalizer.GetBuffer();
-	if (pOut)
-	{
-		const bool res = jpge::compress_image_to_jpeg_file(pFilenameOut, imageSizeX, imageSizeY, outChannels, pOut, outParam);
-		if (res)
-			std::cout << "Save\n";
-		else
-		{
-			std::cout << "Can't write out file " << pFilenameOut << std::endl;
-			return 1;
-		}
-	}
-	else
-	{
-		std::cout << "There is no any filter\n";
-	}
+    CImageBinarizer binalizer(pFilter);
+    binalizer.Process( imageIn );
+    cv::Mat imageOut( imageSizeX, imageSizeY, CV_8U, binalizer.GetBuffer() );
+    const bool res = cv::imwrite( pFilenameOut, imageOut );
+    if( res )
+    {
+        std::cout << "Done.\n";
+    }
+    else
+    {
+        std::cout << "Can't write out file " << pFilenameOut << std::endl;
+        return 4;
+    }
 
     return 0;
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
